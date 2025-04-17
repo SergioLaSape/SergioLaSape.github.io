@@ -136,6 +136,8 @@ function initChefHatAnimation() {
     
     const gltfLoader = new THREE.GLTFLoader(loadingManager);
     
+    const fadeElement = document.getElementById('fade');
+
     gltfLoader.load(
         'chef_hat.glb',
         function(gltf) {
@@ -160,6 +162,13 @@ function initChefHatAnimation() {
             });
             scene.add(chefHatModel);
             animationContainer.style.pointerEvents = 'auto';
+
+            if (fadeElement) {
+                fadeElement.style.opacity = '0';
+                setTimeout(() => {
+                    fadeElement.style.display = 'none';
+                }, 500);
+            }
         },
         function(xhr) {
             console.log((xhr.loaded / xhr.total * 100) + '% loaded');
