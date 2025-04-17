@@ -50,13 +50,26 @@ window.addEventListener('load', () => {
     }
 
     initChefHatAnimation();
-    
-    // Ajout du scroll arrow
+
     const heroSection = document.querySelector('.hero');
     if (heroSection) {
         const scrollArrow = document.createElement('div');
         scrollArrow.className = 'scroll-arrow';
         heroSection.appendChild(scrollArrow);
+        
+        scrollArrow.addEventListener('click', function() {
+            const nouveautesSection = document.querySelector('#featured');
+            if (nouveautesSection) {
+                const headerOffset = document.querySelector('header').offsetHeight;
+                const elementPosition = nouveautesSection.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.scrollY - headerOffset;
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
     }
 });
 
