@@ -147,7 +147,7 @@ function initChefHatAnimation() {
                 chefHatModel.position.set(0, 0.5, 0);
             } else {
                 chefHatModel.scale.set(5.0, 5.0, 5.0);
-                chefHatModel.position.set(0, -1, 0);
+                chefHatModel.position.set(0, 2.0, 0);
             }
             
             chefHatModel.rotation.x = -0.3; 
@@ -361,7 +361,7 @@ function initChefHatAnimation() {
                 chefHatModel.position.set(0, 0.5, 0);
             } else {
                 chefHatModel.scale.set(5.0, 5.0, 5.0);
-                chefHatModel.position.set(0, -1.0, 0);
+                chefHatModel.position.set(0, 2.0, 0);
             }
         }
     });
