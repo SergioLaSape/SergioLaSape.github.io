@@ -128,11 +128,11 @@ function initChefHatAnimation() {
         function(gltf) {
             chefHatModel = gltf.scene;
             if (window.innerWidth <= 767) {
-                chefHatModel.scale.set(3.0, 3.0, 3.0);
-                chefHatModel.position.set(0, 0.3, 0);
+                chefHatModel.scale.set(2.7, 2.7, 2.7);
+                chefHatModel.position.set(0, 0.5, 0);
             } else {
                 chefHatModel.scale.set(5.0, 5.0, 5.0);
-                chefHatModel.position.set(0, 0, 0);
+                chefHatModel.position.set(0, -1, 0);
             }
             
             chefHatModel.rotation.x = -0.3; 
@@ -315,8 +315,9 @@ function initChefHatAnimation() {
                     chefHatModel.rotation.y += autoRotationSpeed * deltaTime;
                 }
                 
-                const floatY = Math.sin(time * 0.001) * 0.2;
-                chefHatModel.position.y = floatY - 0.5;
+                const floatY = Math.sin(time * 0.001) * 0.1;
+                const baseY = window.innerWidth <= 767 ? 0.3 : -0.7;
+                chefHatModel.position.y = floatY + baseY; 
             }
             
             renderer.render(scene, camera);
@@ -334,8 +335,8 @@ function initChefHatAnimation() {
         
         if (chefHatModel) {
             if (width <= 767) {
-                chefHatModel.scale.set(3.0, 3.0, 3.0);
-                chefHatModel.position.set(0, -0.5, 0);
+                chefHatModel.scale.set(2.7, 2.7, 2.7);
+                chefHatModel.position.set(0, 0.5, 0);
             } else {
                 chefHatModel.scale.set(5.0, 5.0, 5.0);
                 chefHatModel.position.set(0, -1.0, 0);
