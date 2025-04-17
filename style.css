@@ -161,12 +161,6 @@ nav ul li a:hover::after {
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-@media screen and (max-width: 767px) {
-    .scroll-arrow {
-        display: none;
-    }
-}
-
 .scroll-arrow::before {
     content: '';
     width: 15px;
