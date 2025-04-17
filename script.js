@@ -1,10 +1,10 @@
 // DOM elements
 const logoElement = document.getElementById('logo');
-let chefHatModel; // Reference to the chef hat 3D model
+let chefHatModel;
+let rotationVelocity = { x: 0, y: 0 };
+let lastTime = 0;
 
-// Wait for everything to load
 window.addEventListener('load', () => {
-    // Smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             e.preventDefault();
@@ -18,7 +18,6 @@ window.addEventListener('load', () => {
         });
     });
 
-    // Intersection Observer for animations
     const observerOptions = {
         threshold: 0.2,
         rootMargin: '0px 0px -50px 0px'
@@ -33,7 +32,6 @@ window.addEventListener('load', () => {
         });
     }, observerOptions);
 
-    // Observe all sections
     document.querySelectorAll('section').forEach(section => {
         section.style.opacity = 0;
         section.style.transform = 'translateY(30px)';
@@ -41,7 +39,6 @@ window.addEventListener('load', () => {
         observer.observe(section);
     });
 
-    // Logo animation on hover
     if (logoElement) {
         logoElement.addEventListener('mouseover', () => {
             logoElement.style.transform = 'rotate(10deg)';
@@ -52,17 +49,21 @@ window.addEventListener('load', () => {
         });
     }
 
-    // Initialize Chef Hat Animation in hero section
     initChefHatAnimation();
+    
+    // Ajout du scroll arrow
+    const heroSection = document.querySelector('.hero');
+    if (heroSection) {
+        const scrollArrow = document.createElement('div');
+        scrollArrow.className = 'scroll-arrow';
+        heroSection.appendChild(scrollArrow);
+    }
 });
 
-// Three.js chef hat animation
 function initChefHatAnimation() {
-    // Get the hero section
     const heroSection = document.querySelector('.hero');
     if (!heroSection) return;
     
-    // Create container for the 3D animation
     const animationContainer = document.createElement('div');
     animationContainer.id = 'chefhat-animation';
     animationContainer.style.position = 'absolute';
@@ -70,13 +71,11 @@ function initChefHatAnimation() {
     animationContainer.style.left = '0';
     animationContainer.style.width = '100%';
     animationContainer.style.height = '100%';
-    animationContainer.style.zIndex = '0'; // Behind the hero content
-    animationContainer.style.pointerEvents = 'none'; // Initially disable pointer events
+    animationContainer.style.zIndex = '0';
+    animationContainer.style.pointerEvents = 'none';
     
-    // Insert the animation container at the beginning of the hero section
     heroSection.insertBefore(animationContainer, heroSection.firstChild);
     
-    // Setup Three.js scene
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     
@@ -85,113 +84,138 @@ function initChefHatAnimation() {
         alpha: true 
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x000000, 0); // Transparent background
+    renderer.setClearColor(0x000000, 0);
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.5;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     
     animationContainer.appendChild(renderer.domElement);
     
-    // Add lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
     
-    const mainLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
     mainLight.position.set(5, 5, 5);
+    mainLight.castShadow = true;
+    mainLight.shadow.mapSize.width = 1024;
+    mainLight.shadow.mapSize.height = 1024;
+    mainLight.shadow.camera.near = 0.5;
+    mainLight.shadow.camera.far = 50;
     scene.add(mainLight);
     
-    const accentLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    const accentLight = new THREE.DirectionalLight(0xffebcd, 0.6);
     accentLight.position.set(-5, 2, -3);
     scene.add(accentLight);
     
-    // Position camera
+    const rimLight = new THREE.SpotLight(0xf5deb3, 0.8);
+    rimLight.position.set(0, -3, 5);
+    rimLight.angle = Math.PI / 4;
+    rimLight.penumbra = 0.5;
+    rimLight.castShadow = true;
+    scene.add(rimLight);
+    
     camera.position.z = 5;
     camera.position.y = 0;
     
-    // Create a loading manager
     const loadingManager = new THREE.LoadingManager();
     
-    // Set up GLTF loader
     const gltfLoader = new THREE.GLTFLoader(loadingManager);
     
-    // Load chef hat model
     gltfLoader.load(
-        'chef_hat.glb',  // Your local chef hat model
+        'chef_hat.glb',
         function(gltf) {
             chefHatModel = gltf.scene;
-            
-            // Scale and position the model appropriately
-            // You might need to adjust these values based on your model
-            chefHatModel.scale.set(0.5, 0.5, 0.5);
-            chefHatModel.position.set(0, 0, 0);
-            
-            // Add the model to the scene
+            chefHatModel.scale.set(5.0, 5.0, 5.0);
+            chefHatModel.position.set(0, -1.0, 0);
+            chefHatModel.rotation.x = 0.2;
+            chefHatModel.traverse(function(node) {
+                if (node.isMesh) {
+                    node.castShadow = true;
+                    node.receiveShadow = true;
+                }
+            });
             scene.add(chefHatModel);
-            
-            // Once model is loaded, enable pointer events
             animationContainer.style.pointerEvents = 'auto';
         },
         function(xhr) {
-            // Progress callback
             console.log((xhr.loaded / xhr.total * 100) + '% loaded');
         },
         function(error) {
-            // Error callback
             console.error('An error happened loading the GLTF model:', error);
         }
     );
     
-    // Mouse interaction variables
     let isDragging = false;
     let previousMousePosition = {
         x: 0,
         y: 0
     };
+    let dragStartTime = 0;
+    let lastDragTime = 0;
     let initialY = window.scrollY;
     
-    // Handle mouse/touch events
     renderer.domElement.addEventListener('mousedown', onMouseDown);
-    renderer.domElement.addEventListener('touchstart', onTouchStart, { passive: true });
+    renderer.domElement.addEventListener('touchstart', onTouchStart, { passive: false });
     window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
     window.addEventListener('mouseup', onMouseUp);
     window.addEventListener('touchend', onTouchEnd);
     
     function onMouseDown(event) {
+        event.preventDefault();
         isDragging = true;
+        dragStartTime = Date.now();
+        lastDragTime = dragStartTime;
         previousMousePosition = {
             x: event.clientX,
             y: event.clientY
         };
         initialY = window.scrollY;
+        rotationVelocity = { x: 0, y: 0 };
     }
     
     function onTouchStart(event) {
+        event.preventDefault();
         if (event.touches.length === 1) {
             isDragging = true;
+            dragStartTime = Date.now();
+            lastDragTime = dragStartTime;
             previousMousePosition = {
                 x: event.touches[0].clientX,
                 y: event.touches[0].clientY
             };
             initialY = window.scrollY;
+            rotationVelocity = { x: 0, y: 0 };
         }
     }
     
     function onMouseMove(event) {
         if (!isDragging) return;
         
+        const now = Date.now();
+        const deltaTime = (now - lastDragTime) / 1000;
+        lastDragTime = now;
+        
         const deltaMove = {
             x: event.clientX - previousMousePosition.x,
             y: event.clientY - previousMousePosition.y
         };
         
-        // If user is trying to scroll vertically, disable dragging
         if (Math.abs(deltaMove.y) > Math.abs(deltaMove.x) * 2) {
             isDragging = false;
             return;
         }
         
-        rotateChefHat(deltaMove);
+        if (deltaTime > 0) {
+            rotationVelocity = {
+                x: deltaMove.y * 0.01 / deltaTime,
+                y: deltaMove.x * 0.01 / deltaTime
+            };
+            
+            rotateChefHat(deltaMove);
+        }
         
         previousMousePosition = {
             x: event.clientX,
@@ -202,18 +226,30 @@ function initChefHatAnimation() {
     function onTouchMove(event) {
         if (!isDragging || event.touches.length !== 1) return;
         
+        event.preventDefault();
+        
+        const now = Date.now();
+        const deltaTime = (now - lastDragTime) / 1000;
+        lastDragTime = now;
+        
         const deltaMove = {
             x: event.touches[0].clientX - previousMousePosition.x,
             y: event.touches[0].clientY - previousMousePosition.y
         };
         
-        // If user is trying to scroll vertically, disable dragging
         if (Math.abs(deltaMove.y) > Math.abs(deltaMove.x) * 2) {
             isDragging = false;
             return;
         }
         
-        rotateChefHat(deltaMove);
+        if (deltaTime > 0) {
+            rotationVelocity = {
+                x: deltaMove.y * 0.01 / deltaTime,
+                y: deltaMove.x * 0.01 / deltaTime
+            };
+            
+            rotateChefHat(deltaMove);
+        }
         
         previousMousePosition = {
             x: event.touches[0].clientX,
@@ -221,11 +257,11 @@ function initChefHatAnimation() {
         };
     }
     
-    function onMouseUp() {
+    function onMouseUp(event) {
         isDragging = false;
     }
     
-    function onTouchEnd() {
+    function onTouchEnd(event) {
         isDragging = false;
     }
     
@@ -233,31 +269,46 @@ function initChefHatAnimation() {
         if (!chefHatModel) return;
         
         chefHatModel.rotation.y += deltaMove.x * 0.01;
-        chefHatModel.rotation.x += deltaMove.y * 0.01;
+        chefHatModel.rotation.x = Math.max(-0.5, Math.min(0.5, chefHatModel.rotation.x + deltaMove.y * 0.01));
     }
     
-    function animate() {
+    function animate(time) {
         requestAnimationFrame(animate);
         
-        // Only animate if we're near the hero section (performance optimization)
+        const deltaTime = (time - lastTime) / 1000;
+        lastTime = time;
+        
         const heroRect = heroSection.getBoundingClientRect();
         const isVisible = heroRect.top < window.innerHeight && heroRect.bottom > 0;
         
         if (isVisible) {
             if (chefHatModel && !isDragging) {
-                // Gentle automatic rotation
-                chefHatModel.rotation.y += 0.003;
+                const friction = 0.95;
                 
-                // Small floating animation
-                const floatY = Math.sin(Date.now() * 0.0008) * 0.2;
-                chefHatModel.position.y = floatY;
+                rotationVelocity.x *= friction;
+                rotationVelocity.y *= friction;
+                
+                if (Math.abs(rotationVelocity.x) > 0.001 || Math.abs(rotationVelocity.y) > 0.001) {
+                    chefHatModel.rotation.x = Math.max(-0.5, Math.min(0.5, chefHatModel.rotation.x + rotationVelocity.x * deltaTime));
+                    chefHatModel.rotation.y += rotationVelocity.y * deltaTime;
+                } else {
+                    rotationVelocity.x = 0;
+                    rotationVelocity.y = 0;
+                }
+                
+                const autoRotationSpeed = 0.2;
+                if (Math.abs(rotationVelocity.y) < 0.1) {
+                    chefHatModel.rotation.y += autoRotationSpeed * deltaTime;
+                }
+                
+                const floatY = Math.sin(time * 0.001) * 0.2;
+                chefHatModel.position.y = floatY - 0.5;
             }
             
             renderer.render(scene, camera);
         }
     }
     
-    // Handle window resize
     window.addEventListener('resize', () => {
         const width = window.innerWidth;
         const height = window.innerHeight;
@@ -268,10 +319,8 @@ function initChefHatAnimation() {
         renderer.setSize(width, height);
     });
     
-    // Handle scroll events to detect if user has scrolled away from hero
     window.addEventListener('scroll', () => {
         const heroRect = heroSection.getBoundingClientRect();
-        // If hero is not visible anymore, disable pointer events
         if (heroRect.bottom < 0 || heroRect.top > window.innerHeight) {
             animationContainer.style.pointerEvents = 'none';
         } else {
@@ -279,21 +328,25 @@ function initChefHatAnimation() {
         }
     });
     
-    // Start the animation
-    animate();
+    animate(0);
 }
 
-// Handle scroll events for parallax
 window.addEventListener('scroll', () => {
-    // Add a subtle parallax effect on scroll
     const scrollY = window.scrollY;
     const heroSection = document.querySelector('.hero');
     
     if (heroSection) {
         heroSection.style.backgroundPositionY = -scrollY * 0.2 + 'px';
+        
+        // Masquer la flèche de défilement lorsque l'utilisateur commence à défiler
+        const scrollArrow = document.querySelector('.scroll-arrow');
+        if (scrollArrow && scrollY > 50) {
+            scrollArrow.style.opacity = '0';
+        } else if (scrollArrow) {
+            scrollArrow.style.opacity = '1';
+        }
     }
     
-    // Make header sticky with shadow after scrolling
     const header = document.querySelector('header');
     if (header) {
         if (scrollY > 0) {
@@ -305,9 +358,7 @@ window.addEventListener('scroll', () => {
     }
 });
 
-// When the DOM content is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Create a subtle animation for the products on hover
     const productCards = document.querySelectorAll('.product-card');
     
     productCards.forEach(card => {
