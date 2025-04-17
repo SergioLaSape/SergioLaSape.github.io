@@ -127,9 +127,18 @@ function initChefHatAnimation() {
         'chef_hat.glb',
         function(gltf) {
             chefHatModel = gltf.scene;
-            chefHatModel.scale.set(5.0, 5.0, 5.0);
-            chefHatModel.position.set(0, -1.0, 0);
-            chefHatModel.rotation.x = 0.2;
+            if (window.innerWidth <= 767) {
+                chefHatModel.scale.set(3.0, 3.0, 3.0);
+                chefHatModel.position.set(0, -0.5, 0);
+            } else {
+                chefHatModel.scale.set(5.0, 5.0, 5.0);
+                chefHatModel.position.set(0, -1.0, 0);
+            }
+            
+            chefHatModel.rotation.x = -0.3; 
+            chefHatModel.rotation.y = 0.1;
+            chefHatModel.rotation.z = 0.15;
+            
             chefHatModel.traverse(function(node) {
                 if (node.isMesh) {
                     node.castShadow = true;
@@ -226,6 +235,16 @@ function initChefHatAnimation() {
     function onTouchMove(event) {
         if (!isDragging || event.touches.length !== 1) return;
         
+        const touchY = event.touches[0].clientY;
+        const touchDeltaY = Math.abs(touchY - previousMousePosition.y);
+        const touchX = event.touches[0].clientX;
+        const touchDeltaX = Math.abs(touchX - previousMousePosition.x);
+        
+        if (touchDeltaY > touchDeltaX * 1.5 && touchDeltaY > 10) {
+            isDragging = false;
+            return;
+        }
+        
         event.preventDefault();
         
         const now = Date.now();
@@ -233,14 +252,9 @@ function initChefHatAnimation() {
         lastDragTime = now;
         
         const deltaMove = {
-            x: event.touches[0].clientX - previousMousePosition.x,
-            y: event.touches[0].clientY - previousMousePosition.y
+            x: touchX - previousMousePosition.x,
+            y: touchY - previousMousePosition.y
         };
-        
-        if (Math.abs(deltaMove.y) > Math.abs(deltaMove.x) * 2) {
-            isDragging = false;
-            return;
-        }
         
         if (deltaTime > 0) {
             rotationVelocity = {
@@ -252,8 +266,8 @@ function initChefHatAnimation() {
         }
         
         previousMousePosition = {
-            x: event.touches[0].clientX,
-            y: event.touches[0].clientY
+            x: touchX,
+            y: touchY
         };
     }
     
@@ -317,6 +331,16 @@ function initChefHatAnimation() {
         camera.updateProjectionMatrix();
         
         renderer.setSize(width, height);
+        
+        if (chefHatModel) {
+            if (width <= 767) {
+                chefHatModel.scale.set(3.0, 3.0, 3.0);
+                chefHatModel.position.set(0, -0.5, 0);
+            } else {
+                chefHatModel.scale.set(5.0, 5.0, 5.0);
+                chefHatModel.position.set(0, -1.0, 0);
+            }
+        }
     });
     
     window.addEventListener('scroll', () => {

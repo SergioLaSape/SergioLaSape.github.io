@@ -645,7 +645,13 @@ footer {
 @media (max-width: 767px) {
     header {
         flex-direction: column;
-        padding: 10px 5%;
+        padding: 15px 5%;
+        height: auto;
+    }
+    
+    .logo {
+        width: 50px;
+        height: 50px;
     }
     
     .logo-container {
@@ -654,28 +660,81 @@ footer {
     
     nav ul {
         justify-content: center;
+        flex-wrap: wrap;
     }
     
     nav ul li {
-        margin: 0 10px;
+        margin: 5px 10px;
     }
     
     .hero {
-        height: 80vh;
+        height: 70vh;
+        padding-top: 100px;
     }
     
     .hero-content {
-        padding: 20px;
+        padding: 15px;
         width: 90%;
     }
     
     .hero h2 {
-        font-size: 2.5rem;
+        font-size: 2rem;
     }
-
+    
+    .hero p {
+        font-size: 1rem;
+    }
+    
+    .scroll-arrow {
+        bottom: 20px;
+    }
+    
+    .about {
+        padding: 80px 0;
+    }
+    
     .about-details {
         flex-direction: column;
-        gap: 30px;
+        gap: 20px;
+    }
+    
+    .about-item {
+        width: 100%;
+    }
+    
+    .products {
+        padding: 80px 0;
+    }
+    
+    .products h2 {
+        font-size: 2.5rem;
+        margin-bottom: 40px;
+    }
+    
+    .product-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 15px;
+    }
+    
+    .product-card {
+        padding: 20px 15px;
+    }
+    
+    .product-emoji {
+        font-size: 2.8rem;
+    }
+    
+    .product-card h3 {
+        font-size: 1.2rem;
+    }
+    
+    .contact {
+        padding: 80px 0;
+    }
+    
+    .contact h2 {
+        font-size: 2.5rem;
+        margin-bottom: 40px;
     }
     
     .contact-details {
@@ -683,19 +742,49 @@ footer {
     }
     
     .map-placeholder {
-        margin-top: 30px;
+        margin-top: 20px;
+        min-height: 250px;
+    }
+    
+    .contact-item {
+        padding: 15px;
+    }
+    
+    .contact-item .emoji {
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+    }
+    
+    .footer-content {
+        flex-direction: column;
+        font-size: 0.9rem;
     }
 }
 
 @media (max-width: 480px) {
+    header h1 {
+        font-size: 1.6rem;
+    }
+    
     .hero h2 {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
-
+    
     .featured-card {
-        padding: 25px;
+        padding: 20px 15px;
     }
-
+    
+    .featured-card h3 {
+        font-size: 1.5rem;
+    }
+    
+    .emoji-placeholder {
+        font-size: 2.2rem;
+        margin: 15px 0;
+        letter-spacing: 10px;
+    }
+    
     .product-grid {
         grid-template-columns: 1fr;
     }
