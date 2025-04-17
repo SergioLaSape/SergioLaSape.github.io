@@ -63,9 +63,9 @@ header.sticky {
 .logo-container {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     flex-grow: 1;
-    text-align: center;
+    text-align: left;
 }
 
 .logo {
@@ -75,14 +75,13 @@ header.sticky {
 }
 
 header h1 {
-    font-size: 3.5rem;
+    font-size: 3rem;
     color: var(--secondary-color);
     letter-spacing: 1px;
     transform: skew(-5deg);
-    text-align: center;
     margin: 0;
-    text-align: center;
-    flex: 1;
+    flex-grow: 1;
+    text-align: left;
 }
 
 nav {
@@ -647,6 +646,10 @@ footer {
     
     .hero h2 {
         font-size: 4.2rem;
+    }
+    
+    .logo {
+        margin-right: 20px;
     }
 }
 
