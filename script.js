@@ -129,7 +129,7 @@ function initChefHatAnimation() {
             chefHatModel = gltf.scene;
             if (window.innerWidth <= 767) {
                 chefHatModel.scale.set(3.0, 3.0, 3.0);
-                chefHatModel.position.set(0, 0, 0);
+                chefHatModel.position.set(0, 0.3, 0);
             } else {
                 chefHatModel.scale.set(5.0, 5.0, 5.0);
                 chefHatModel.position.set(0, 0, 0);
